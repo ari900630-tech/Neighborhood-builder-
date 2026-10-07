@@ -21,7 +21,7 @@
 </head>
 <body>
 <div id="scene"></div><div id="title">ריצה בפארק</div><div id="start"><div class="panel"><h1>ריצה בפארק</h1><p>הדמות רצה קדימה. השתמש בג׳ויסטיק כדי לפנות.</p><button id="play">התחל לרוץ</button></div></div>
-<div class="hud"><div class="badge">רץ 3D</div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div>
+<div class="hud"><div class="badge">רץ 3D</div><div class="badge">מטבעות: <span id="money">0</span></div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div>
 <div id="hint">הדמות רצה אוטומטית • גרור את הג׳ויסטיק כדי לפנות</div>
 <div id="joystick"><div id="stick"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -51,7 +51,7 @@ function tree(x,z){
 }
 for(let z=0;z>-220;z-=12){tree(-6-Math.random()*4,z);tree(6+Math.random()*4,z-5)}
 
-const runner=new THREE.Group(); runner.position.set(0,0,3);
+const runner=new THREE.Group(); runner.position.set(0,0,3);\nconst obstacles=[],coins=[];\nfunction obstacle(x,z,type){const g=new THREE.Group();const m=mat(type==="barrier"?0xf97316:0x7c3aed);const b=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.8),m);b.position.y=.45;b.castShadow=true;g.add(b);if(type==="barrier"){const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.35,.12,.84),mat(0xffffff));stripe.position.y=.65;g.add(stripe)}g.position.set(x,0,z);scene.add(g);obstacles.push(g)}\nfunction coin(x,z){const c=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.08,20),mat(0xffd21f));c.rotation.x=Math.PI/2;c.position.set(x,.65,z);c.castShadow=true;scene.add(c);coins.push(c)}\nfor(let z=-18;z>-230;z-=18){const lane=(Math.floor(Math.abs(z)/18)%3)-1; obstacle(lane*2.05,z,"barrier"); coin(-lane*2.05,z-6); if(z%36===0) coin(0,z-9)}
 function mat(c){return new THREE.MeshStandardMaterial({color:c})}
 const skin=mat(0xf0b38c), shirt=mat(0x2468d8), pants=mat(0x252b38), shoes=mat(0xeeeeee);
 const torso=new THREE.Mesh(new THREE.BoxGeometry(.75,1.15,.45),shirt);torso.position.y=1.75;torso.castShadow=true;runner.add(torso);
@@ -64,7 +64,7 @@ const footL=new THREE.Mesh(new THREE.BoxGeometry(.3,.16,.6),shoes),footR=footL.c
 footL.position.set(-.22,.35,-.18);footR.position.set(.22,.35,-.18);runner.add(footL,footR);
 scene.add(runner);
 
-let vx=0,runTime=0,distance=0,last=performance.now(),joyX=0;
+let vx=0,runTime=0,distance=0,last=performance.now(),joyX=0,money=0,gameStarted=false;
 const joy=document.getElementById('joystick'),stick=document.getElementById('stick');
 let active=false;
 function moveJoy(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=x-cx,dy=y-cy;const max=42;const d=Math.hypot(dx,dy);if(d>max){dx*=max/d;dy*=max/d}stick.style.transform=`translate(${dx}px,${dy}px)`;joyX=dx/max}
