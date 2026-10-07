@@ -7,15 +7,20 @@
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif;touch-action:none}
 #scene{position:fixed;inset:0}canvas{display:block}
-.hud{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:5;color:white;text-shadow:0 2px 5px #000;font-weight:700;font-size:18px}
-.badge{background:#0008;padding:9px 14px;border-radius:14px;backdrop-filter:blur(5px)}
-#hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:5;color:#fff;background:#0009;padding:10px 16px;border-radius:18px;font-size:14px}
+.hud{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:5;color:white;font-weight:800;font-size:17px}
+.badge{background:rgba(15,23,42,.78);padding:10px 15px;border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 6px 20px #0004;border:1px solid #ffffff33}
+#hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:5;color:#fff;background:rgba(15,23,42,.82);padding:11px 17px;border-radius:18px;font-size:14px;white-space:nowrap;box-shadow:0 6px 20px #0004}
+#title{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:5;color:#fff;font-size:28px;font-weight:900;text-shadow:0 3px 12px #0008;white-space:nowrap}
+#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:linear-gradient(#0004,#0008);transition:opacity .35s}
+.panel{width:min(88%,360px);padding:26px;border-radius:24px;background:rgba(255,255,255,.95);box-shadow:0 20px 60px #0006;text-align:center;color:#172033}
+.panel h1{margin:0 0 8px;font-size:30px}.panel p{margin:0 0 20px;color:#64748b}
+#play{border:0;border-radius:14px;padding:13px 28px;background:#2563eb;color:#fff;font-size:18px;font-weight:800}
 #joystick{position:fixed;bottom:22px;left:22px;width:125px;height:125px;border-radius:50%;background:#0005;border:2px solid #fff8;z-index:10}
 #stick{position:absolute;width:58px;height:58px;border-radius:50%;background:#fff;left:31px;top:31px;box-shadow:0 3px 12px #0006}
 </style>
 </head>
 <body>
-<div id="scene"></div>
+<div id="scene"></div><div id="title">ריצה בפארק</div><div id="start"><div class="panel"><h1>ריצה בפארק</h1><p>הדמות רצה קדימה. השתמש בג׳ויסטיק כדי לפנות.</p><button id="play">התחל לרוץ</button></div></div>
 <div class="hud"><div class="badge">רץ 3D</div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div>
 <div id="hint">הדמות רצה אוטומטית • גרור את הג׳ויסטיק כדי לפנות</div>
 <div id="joystick"><div id="stick"></div></div>
@@ -94,4 +99,4 @@ function animate(now){
 requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
-</body></html>
+<script>document.getElementById("play").addEventListener("click",()=>{const s=document.getElementById("start");s.style.opacity="0";setTimeout(()=>s.remove(),350)});</script></body></html>
