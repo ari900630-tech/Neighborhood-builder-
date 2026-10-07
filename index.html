@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#f7f9fc">
 <title>בונה השכונה</title>
 <style>
@@ -22,7 +22,24 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .toast{position:absolute;top:88px;left:50%;transform:translate(-50%,-8px);z-index:30;background:#172033;color:#fff;padding:10px 15px;border-radius:13px;opacity:0;pointer-events:none;transition:.2s;font-size:13px;font-weight:800;box-shadow:0 10px 28px #17203344}.toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:700px){.top{top:8px;left:8px;right:8px;height:58px;border-radius:18px;padding:6px 8px;gap:7px}.logo{font-size:14px}.logo span{font-size:9px}.stats{gap:4px}.stat{min-width:57px;padding:6px 4px;font-size:10px}.stat b{font-size:11px}.topBtn{width:37px;height:37px}.tip{top:73px;font-size:10px;max-width:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis}.menu{top:74px;right:9px;width:260px}.buildbar{bottom:8px;border-radius:20px}.tool{flex-basis:70px}.info{bottom:86px;left:9px;width:170px}}
 </style>
-</head>
+<style id="mobile-fullscreen-fix">
+html,body{width:100%;height:100%;min-height:100%;margin:0;padding:0;overflow:hidden;overscroll-behavior:none}
+body{min-height:100dvh;width:100vw}
+#app,canvas{width:100%;height:100%;min-height:100dvh}
+*{box-sizing:border-box}
+@media (max-width:700px){
+  body{font-size:14px}
+  .topbar{top:max(8px,env(safe-area-inset-top));left:8px;right:8px;width:auto;max-width:none;padding:9px 10px;border-radius:16px}
+  .stats{gap:5px;overflow-x:auto;scrollbar-width:none}
+  .stats::-webkit-scrollbar{display:none}
+  .stat{padding:6px 8px;white-space:nowrap;font-size:12px}
+  .toolbar{left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-width:none;padding:7px;overflow-x:auto;display:flex;gap:7px;scrollbar-width:none}
+  .toolbar::-webkit-scrollbar{display:none}
+  .tool{min-width:72px;flex:0 0 72px;padding:8px 5px}
+  .panel{left:8px;right:8px;width:auto;max-width:none;bottom:105px}
+  button{min-height:44px}
+}
+</style></head>
 <body>
 <div id="app">
 <canvas id="game"></canvas>
