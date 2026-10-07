@@ -19,7 +19,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .buildbar{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);z-index:8;width:min(720px,calc(100% - 18px));background:#fffffff2;border:1px solid #fff;border-radius:23px;padding:8px;box-shadow:0 14px 38px #23304428;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.buildbar::-webkit-scrollbar{display:none}
 .tool{flex:0 0 76px;border:0;background:#f5f7fa;color:#344054;border-radius:16px;padding:8px 5px;font-weight:800}.tool .ico{width:38px;height:38px;margin:auto;border-radius:12px;display:grid;place-items:center;background:#fff;font-size:21px;box-shadow:0 2px 7px #2330440b}.tool small{display:block;margin-top:5px;font-size:10px;white-space:nowrap}.tool.active{background:#edf2ff;color:var(--accent);outline:2px solid #dbe4ff}.tool.active .ico{background:#315efb;color:#fff}
 .info{position:absolute;left:14px;bottom:93px;z-index:5;width:190px;background:#ffffffed;border-radius:16px;padding:11px 12px;box-shadow:0 8px 25px #23304415;display:none}.info.show{display:block}.info b{font-size:13px}.info small{display:block;color:var(--muted);margin-top:4px;line-height:1.45}
-.toast{position:absolute;top:88px;left:50%;transform:translate(-50%,-8px);z-index:30;background:#172033;color:#fff;padding:10px 15px;border-radius:13px;opacity:0;pointer-events:none;transition:.2s;font-size:13px;font-weight:800;box-shadow:0 10px 28px #17203344}.toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:700px){.top{top:8px;left:8px;right:8px;height:58px;border-radius:18px;padding:6px 8px;gap:7px}.logo{font-size:14px}.logo span{font-size:9px}.stats{gap:4px}.stat{min-width:57px;padding:6px 4px;font-size:10px}.stat b{font-size:11px}.topBtn{width:37px;height:37px}.tip{top:73px;font-size:10px;max-width:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis}.menu{top:74px;right:9px;width:260px}.buildbar{bottom:8px;border-radius:20px}.tool{flex-basis:70px}.info{bottom:86px;left:9px;width:170px}}
 </style>
 <style id="mobile-fullscreen-fix">
@@ -120,18 +119,18 @@ function place(x,y){
 function selectAt(x,y){let found=S.objects.findLast(o=>Math.abs(o.x-x)<.8&&Math.abs(o.y-y)<.8);if(found){S.selected=found;const t=types[found.type];document.getElementById('infoTitle').textContent=t.icon+' '+t.name;document.getElementById('infoText').textContent=t.desc+' • עלות: '+t.cost.toLocaleString('he-IL')+'₪';document.getElementById('info').classList.add('show')}else hideInfo();draw()}
 function hideInfo(){S.selected=null;document.getElementById('info').classList.remove('show')}
 function update(){document.getElementById('money').textContent=Math.floor(S.money).toLocaleString('he-IL');document.getElementById('pop').textContent=S.pop;document.getElementById('score').textContent=Math.floor(S.score);}
-function toast(s){}
+
 canvas.addEventListener('pointerdown',e=>{S.dragging=true;S.moved=false;S.lastX=e.clientX;S.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{const dx=e.clientX-S.lastX,dy=e.clientY-S.lastY;if(S.dragging&&(S.tool==='select'||e.buttons)){if(Math.abs(dx)+Math.abs(dy)>4)S.moved=true;if(S.tool==='select'){S.ox+=dx;S.oy+=dy}}S.lastX=e.clientX;S.lastY=e.clientY;S.preview=toGrid(e.clientX,e.clientY);draw()});
 canvas.addEventListener('pointerup',e=>{S.dragging=false;if(!S.moved){const g=toGrid(e.clientX,e.clientY);place(g.x,g.y)}});
 canvas.addEventListener('wheel',e=>{e.preventDefault();const before=toGrid(e.clientX,e.clientY);S.zoom=Math.max(.55,Math.min(1.75,S.zoom*(e.deltaY<0?1.08:.92)));const after=toScreen(before.x,before.y);S.ox+=e.clientX-after.x;S.oy+=e.clientY-after.y;draw()},{passive:false});
 let pinch=0;canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pinch){S.zoom=Math.max(.55,Math.min(1.75,S.zoom*d/pinch);draw()}pinch=d}},{passive:false});canvas.addEventListener('touchend',()=>pinch=0);
-document.getElementById('pause').onclick=()=>{S.paused=!S.paused;document.getElementById('pause').textContent=S.paused?'▶':'Ⅱ';toast(S.paused?'המשחק מושהה':'המשחק ממשיך')};
+document.getElementById('pause').onclick=()=>{S.paused=!S.paused;document.getElementById('pause').textContent=S.paused?'▶':'Ⅱ'};
 document.getElementById('settings').onclick=()=>document.getElementById('menu').classList.toggle('show');
 document.getElementById('close').onclick=()=>document.getElementById('menu').classList.remove('show');
-document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,objects:S.objects});toast('השכונה נשמרה במכשיר')};
-document.getElementById('load').onclick=()=>{try{Object.assign(S,JSON.parse(localStorage.nbNeighborhood));update();draw();toast('השכונה נטענה')}catch(e){toast('אין שמירה זמינה')}};
-document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.objects=[];S.visitors=[];update();draw();toast('שכונה חדשה מוכנה')}};
+document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,objects:S.objects})};
+document.getElementById('load').onclick=()=>{try{Object.assign(S,JSON.parse(localStorage.nbNeighborhood));update();draw()}};
+document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.objects=[];S.visitors=[];update();draw()}};
 function tick(){if(!S.paused){S.incomeTimer++;if(S.incomeTimer>180){S.incomeTimer=0;const shops=S.objects.filter(o=>o.type==='shop').length;const parks=S.objects.filter(o=>o.type==='park').length;const income=25+shops*35+parks*8;S.money+=income;if(shops)if(Math.random()<.5)S.visitors.push({x:Math.floor(Math.random()*11)-5,y:Math.floor(Math.random()*11)-5,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>12)S.visitors.shift();update()}draw()}requestAnimationFrame(tick)}
 update();resize();tick();
 </script>
