@@ -2,51 +2,96 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>אדם רץ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>רץ 3D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#bfe7ff}
-body{display:flex;align-items:center;justify-content:center}
-#game{position:relative;width:100%;height:100%;max-width:900px;overflow:hidden;background:linear-gradient(#bfe7ff 0 55%,#87c96b 55% 100%)}
-#sun{position:absolute;width:90px;height:90px;border-radius:50%;background:#ffe58a;top:7%;right:10%;box-shadow:0 0 35px #fff0a8}
-.cloud{position:absolute;background:white;border-radius:50px;opacity:.8;width:150px;height:35px;top:15%;left:8%}
-.cloud:before,.cloud:after{content:"";position:absolute;background:white;border-radius:50%;width:55px;height:55px;top:-25px}
-.cloud:before{left:25px}.cloud:after{left:75px}
-#ground{position:absolute;left:-20%;width:140%;height:55%;bottom:-18%;background:#6fba59;transform:rotate(-2deg);border-top:5px solid #4e963f}
-.road{position:absolute;left:-10%;width:120%;height:120px;bottom:18%;background:#777;transform:rotate(-4deg);box-shadow:0 5px 0 #555}
-.lane{position:absolute;left:0;right:0;top:55px;border-top:6px dashed #eee}
-#runner{position:absolute;width:70px;height:125px;left:50%;bottom:28%;transform:translateX(-50%);transition:left .08s}
-.head{position:absolute;width:42px;height:42px;background:#f1b27a;border-radius:50%;left:14px;top:0;box-shadow:inset -4px -3px 0 #d89561}
-.body{position:absolute;width:40px;height:55px;background:#2764d8;border-radius:18px 18px 10px 10px;left:15px;top:38px}
-.arm,.leg{position:absolute;background:#f1b27a;border-radius:15px;transform-origin:top center}
-.arm{width:11px;height:48px;top:43px}.arm.a{left:10px;transform:rotate(38deg)}.arm.b{right:8px;transform:rotate(-38deg)}
-.leg{width:13px;height:55px;top:86px;background:#333}.leg.a{left:17px;transform:rotate(28deg)}.leg.b{right:17px;transform:rotate(-28deg)}
-.shoe{position:absolute;width:29px;height:12px;background:#222;border-radius:12px;bottom:-4px}.leg.a .shoe{left:-8px}.leg.b .shoe{right:-8px}
-#hud{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center;direction:rtl}
-.panel{background:#ffffffdd;padding:10px 15px;border-radius:16px;font-weight:700;box-shadow:0 4px 15px #0002}
-#hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#ffffffdd;padding:10px 16px;border-radius:20px;white-space:nowrap}
-#score{font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif;touch-action:none}
+#scene{position:fixed;inset:0}canvas{display:block}
+.hud{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:5;color:white;text-shadow:0 2px 5px #000;font-weight:700;font-size:18px}
+.badge{background:#0008;padding:9px 14px;border-radius:14px;backdrop-filter:blur(5px)}
+#hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:5;color:#fff;background:#0009;padding:10px 16px;border-radius:18px;font-size:14px}
+#joystick{position:fixed;bottom:22px;left:22px;width:125px;height:125px;border-radius:50%;background:#0005;border:2px solid #fff8;z-index:10}
+#stick{position:absolute;width:58px;height:58px;border-radius:50%;background:#fff;left:31px;top:31px;box-shadow:0 3px 12px #0006}
 </style>
 </head>
 <body>
-<div id="game">
-<div id="sun"></div><div class="cloud"></div><div id="ground"></div>
-<div class="road"><div class="lane"></div></div>
-<div id="runner">
-<div class="head"></div><div class="body"></div>
-<div class="arm a"></div><div class="arm b"></div>
-<div class="leg a"><div class="shoe"></div></div><div class="leg b"><div class="shoe"></div></div>
-</div>
-<div id="hud"><div class="panel">אדם רץ</div><div class="panel">מרחק: <span id="score">0</span> מ׳</div></div>
-<div id="hint">גרור ימינה ושמאלה כדי להזיז את האדם</div>
-</div>
+<div id="scene"></div>
+<div class="hud"><div class="badge">רץ 3D</div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div>
+<div id="hint">הדמות רצה אוטומטית • גרור את הג׳ויסטיק כדי לפנות</div>
+<div id="joystick"><div id="stick"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-const runner=document.getElementById('runner'),score=document.getElementById('score'),game=document.getElementById('game');
-let x=50,meters=0,last=performance.now(),drag=false;
-function setX(clientX){const r=game.getBoundingClientRect();x=Math.max(12,Math.min(88,(clientX-r.left)/r.width*100));runner.style.left=x+'%'}
-game.addEventListener('pointerdown',e=>{drag=true;game.setPointerCapture(e.pointerId);setX(e.clientX)});
-game.addEventListener('pointermove',e=>{if(drag)setX(e.clientX)});
-game.addEventListener('pointerup',()=>drag=false);
-function loop(t){const dt=(t-last)/1000;last=t;meters+=dt*3;score.textContent=meters.toFixed(1);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
+scene.fog=new THREE.Fog(0x87ceeb,35,140);
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,300);
+camera.position.set(0,5.2,10); camera.lookAt(0,1.2,0);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true;
+document.getElementById('scene').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xbfeeff,0x557744,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.5);sun.position.set(-20,30,15);sun.castShadow=true;scene.add(sun);
+
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(180,300),new THREE.MeshStandardMaterial({color:0x55a947}));
+ground.rotation.x=-Math.PI/2;ground.position.z=-80;ground.receiveShadow=true;scene.add(ground);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(7,300),new THREE.MeshStandardMaterial({color:0x555b62}));
+road.rotation.x=-Math.PI/2;road.position.y=.012;road.position.z=-80;road.receiveShadow=true;scene.add(road);
+for(let z=5;z>-250;z-=8){const line=new THREE.Mesh(new THREE.BoxGeometry(.22,.025,4),new THREE.MeshStandardMaterial({color:0xffffff}));line.position.set(0,.04,z);scene.add(line)}
+function tree(x,z){
+ const g=new THREE.Group();
+ const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.28,1.7,8),new THREE.MeshStandardMaterial({color:0x76502d}));
+ trunk.position.y=.85;trunk.castShadow=true;g.add(trunk);
+ const crown=new THREE.Mesh(new THREE.SphereGeometry(1.15,12,10),new THREE.MeshStandardMaterial({color:0x237a35}));
+ crown.position.y=2.15;crown.castShadow=true;g.add(crown);g.position.set(x,0,z);scene.add(g);
+}
+for(let z=0;z>-220;z-=12){tree(-6-Math.random()*4,z);tree(6+Math.random()*4,z-5)}
+
+const runner=new THREE.Group(); runner.position.set(0,0,3);
+function mat(c){return new THREE.MeshStandardMaterial({color:c})}
+const skin=mat(0xf0b38c), shirt=mat(0x2468d8), pants=mat(0x252b38), shoes=mat(0xeeeeee);
+const torso=new THREE.Mesh(new THREE.BoxGeometry(.75,1.15,.45),shirt);torso.position.y=1.75;torso.castShadow=true;runner.add(torso);
+const head=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),skin);head.position.y=2.65;head.castShadow=true;runner.add(head);
+const armL=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.65,6,10),shirt),armR=armL.clone();
+armL.position.set(-.55,1.82,0);armR.position.set(.55,1.82,0);runner.add(armL,armR);
+const legL=new THREE.Mesh(new THREE.CapsuleGeometry(.14,.72,6,10),pants),legR=legL.clone();
+legL.position.set(-.22,.85,0);legR.position.set(.22,.85,0);runner.add(legL,legR);
+const footL=new THREE.Mesh(new THREE.BoxGeometry(.3,.16,.6),shoes),footR=footL.clone();
+footL.position.set(-.22,.35,-.18);footR.position.set(.22,.35,-.18);runner.add(footL,footR);
+scene.add(runner);
+
+let vx=0,runTime=0,distance=0,last=performance.now(),joyX=0;
+const joy=document.getElementById('joystick'),stick=document.getElementById('stick');
+let active=false;
+function moveJoy(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=x-cx,dy=y-cy;const max=42;const d=Math.hypot(dx,dy);if(d>max){dx*=max/d;dy*=max/d}stick.style.transform=`translate(${dx}px,${dy}px)`;joyX=dx/max}
+function endJoy(){active=false;stick.style.transform='translate(0,0)';joyX=0}
+joy.addEventListener('pointerdown',e=>{active=true;joy.setPointerCapture(e.pointerId);moveJoy(e.clientX,e.clientY)});
+joy.addEventListener('pointermove',e=>{if(active)moveJoy(e.clientX,e.clientY)});
+joy.addEventListener('pointerup',endJoy);joy.addEventListener('pointercancel',endJoy);
+
+function animate(now){
+ const dt=Math.min((now-last)/1000,.05);last=now;
+ runTime+=dt*10;
+ // continuous forward running
+ runner.position.z-=dt*5.2;
+ runner.position.x+=joyX*dt*5;
+ runner.position.x=Math.max(-2.7,Math.min(2.7,runner.position.x));
+ runner.rotation.y=-joyX*.18;
+ const swing=Math.sin(runTime)*.85;
+ armL.rotation.x=swing;armR.rotation.x=-swing;legL.rotation.x=-swing;legR.rotation.x=swing;
+ torso.position.y=1.75+Math.abs(Math.sin(runTime*2))*.035;
+ distance+=dt*5.2;
+ document.getElementById('distance').textContent=Math.floor(distance);
+ // keep camera behind player, smoothly
+ camera.position.x+=(runner.position.x*.45-camera.position.x)*dt*4;
+ camera.position.z+=(runner.position.z+7.5-camera.position.z)*dt*4;
+ camera.position.y+=(4.7-camera.position.y)*dt*4;
+ camera.lookAt(runner.position.x*.35,1.35,runner.position.z-8);
+ // recycle scenery by moving camera-relative objects forward
+ for(const o of scene.children){if(o.userData && o.userData.scenery){}
+ }
+ renderer.render(scene,camera);requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
 </body></html>
