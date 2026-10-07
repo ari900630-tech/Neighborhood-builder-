@@ -1,0 +1,1 @@
+{"name":"neighborhood-builder","version":"1.0.0","private":true,"scripts":{"build":"node -e \"const fs=require('fs'); if(!fs.existsSync('index.html')) process.exit(1); const s=fs.readFileSync('index.html','utf8'); if(!s.includes('<canvas')||!s.includes('place(')) process.exit(2); console.log('Build OK: '+s.length+' bytes')\""}}
