@@ -61,7 +61,7 @@ body{min-height:100dvh;width:100vw}
   <div class="menuRow" style="margin-top:8px"><button id="reset">♻️ התחל מחדש</button><button class="primary" id="close">סגור</button></div>
 </div>
 <div id="info" class="info"><b id="infoTitle">בחר מבנה</b><small id="infoText">לחץ על מבנה שכבר בנית כדי לראות פרטים.</small></div>
-<div id="toast" class="toast"></div>
+
 <nav class="buildbar" id="buildbar"></nav>
 </div>
 <script>
@@ -110,17 +110,17 @@ function drawPreview(){const t=types[S.tool];if(!t)return;const p=toScreen(S.pre
 function drawVisitors(){ctx.font='17px serif';S.visitors.forEach(v=>{const p=toScreen(v.x,v.y);ctx.fillText(v.icon,p.x,p.y-6)})}
 function occupied(x,y,w,h){return S.objects.some(o=>Math.abs(o.x-x)<(w+types[o.type].w)/2-.08&&Math.abs(o.y-y)<(h+types[o.type].h)/2-.08)}
 function place(x,y){
- if(S.tool==='bulldoze'){const i=S.objects.findIndex(o=>Math.abs(o.x-x)<.75&&Math.abs(o.y-y)<.75);if(i<0){toast('אין כאן מבנה להריסה');return}const o=S.objects[i],refund=Math.floor(types[o.type].cost*.35);S.objects.splice(i,1);S.money+=refund;if(o.type==='house')S.pop=Math.max(0,S.pop-4);if(o.type==='apartment')S.pop=Math.max(0,S.pop-14);S.score=Math.max(0,S.score-1);toast('המבנה נהרס • הוחזרו '+refund.toLocaleString('he-IL')+'₪');update();return}
+ if(S.tool==='bulldoze'){const i=S.objects.findIndex(o=>Math.abs(o.x-x)<.75&&Math.abs(o.y-y)<.75);if(i<0){return}const o=S.objects[i],refund=Math.floor(types[o.type].cost*.35);S.objects.splice(i,1);S.money+=refund;if(o.type==='house')S.pop=Math.max(0,S.pop-4);if(o.type==='apartment')S.pop=Math.max(0,S.pop-14);S.score=Math.max(0,S.score-1);update();return}
  if(S.tool==='select'){selectAt(x,y);return}
- const t=types[S.tool];if(!t)return;if(S.money<t.cost){toast('צריך עוד '+(t.cost-S.money).toLocaleString('he-IL')+'₪');return}if(occupied(x,y,t.w,t.h)){toast('השטח תפוס');return}
+ const t=types[S.tool];if(!t)return;if(S.money<t.cost){return}if(occupied(x,y,t.w,t.h)){return}
  const o={x,y,type:S.tool,id:Date.now()};S.money-=t.cost;S.objects.push(o);
  if(S.tool==='house')S.pop+=4;if(S.tool==='apartment')S.pop+=14;if(S.tool==='school')S.score+=5;if(S.tool==='park')S.score+=3;if(S.tool==='shop')S.score+=2;
- S.score=Math.min(100,S.score+1);S.selected=o;toast(t.icon+' '+t.name+' נבנה');update();
+ S.score=Math.min(100,S.score+1);S.selected=o;update();
 }
 function selectAt(x,y){let found=S.objects.findLast(o=>Math.abs(o.x-x)<.8&&Math.abs(o.y-y)<.8);if(found){S.selected=found;const t=types[found.type];document.getElementById('infoTitle').textContent=t.icon+' '+t.name;document.getElementById('infoText').textContent=t.desc+' • עלות: '+t.cost.toLocaleString('he-IL')+'₪';document.getElementById('info').classList.add('show')}else hideInfo();draw()}
 function hideInfo(){S.selected=null;document.getElementById('info').classList.remove('show')}
-function update(){document.getElementById('money').textContent=Math.floor(S.money).toLocaleString('he-IL');document.getElementById('pop').textContent=S.pop;document.getElementById('score').textContent=Math.floor(S.score);document.getElementById('day').textContent=Math.floor(S.day)}
-function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('on');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>e.classList.remove('on'),1700)}
+function update(){document.getElementById('money').textContent=Math.floor(S.money).toLocaleString('he-IL');document.getElementById('pop').textContent=S.pop;document.getElementById('score').textContent=Math.floor(S.score);}
+function toast(s){}
 canvas.addEventListener('pointerdown',e=>{S.dragging=true;S.moved=false;S.lastX=e.clientX;S.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{const dx=e.clientX-S.lastX,dy=e.clientY-S.lastY;if(S.dragging&&(S.tool==='select'||e.buttons)){if(Math.abs(dx)+Math.abs(dy)>4)S.moved=true;if(S.tool==='select'){S.ox+=dx;S.oy+=dy}}S.lastX=e.clientX;S.lastY=e.clientY;S.preview=toGrid(e.clientX,e.clientY);draw()});
 canvas.addEventListener('pointerup',e=>{S.dragging=false;if(!S.moved){const g=toGrid(e.clientX,e.clientY);place(g.x,g.y)}});
@@ -132,7 +132,7 @@ document.getElementById('close').onclick=()=>document.getElementById('menu').cla
 document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,objects:S.objects});toast('השכונה נשמרה במכשיר')};
 document.getElementById('load').onclick=()=>{try{Object.assign(S,JSON.parse(localStorage.nbNeighborhood));update();draw();toast('השכונה נטענה')}catch(e){toast('אין שמירה זמינה')}};
 document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.objects=[];S.visitors=[];update();draw();toast('שכונה חדשה מוכנה')}};
-function tick(){if(!S.paused){S.day+=.003;S.incomeTimer++;if(S.incomeTimer>180){S.incomeTimer=0;const shops=S.objects.filter(o=>o.type==='shop').length;const parks=S.objects.filter(o=>o.type==='park').length;const income=25+shops*35+parks*8;S.money+=income;if(shops)toast('💰 הכנסה מהשכונה +'+income+'₪');if(Math.random()<.5)S.visitors.push({x:Math.floor(Math.random()*11)-5,y:Math.floor(Math.random()*11)-5,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>12)S.visitors.shift();update()}draw()}requestAnimationFrame(tick)}
+function tick(){if(!S.paused){S.incomeTimer++;if(S.incomeTimer>180){S.incomeTimer=0;const shops=S.objects.filter(o=>o.type==='shop').length;const parks=S.objects.filter(o=>o.type==='park').length;const income=25+shops*35+parks*8;S.money+=income;if(shops)if(Math.random()<.5)S.visitors.push({x:Math.floor(Math.random()*11)-5,y:Math.floor(Math.random()*11)-5,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>12)S.visitors.shift();update()}draw()}requestAnimationFrame(tick)}
 update();resize();tick();
 </script>
 </body>
