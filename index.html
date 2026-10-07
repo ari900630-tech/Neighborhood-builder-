@@ -51,7 +51,15 @@ function tree(x,z){
 }
 for(let z=0;z>-220;z-=12){tree(-6-Math.random()*4,z);tree(6+Math.random()*4,z-5)}
 
-const runner=new THREE.Group(); runner.position.set(0,0,3);\nrunner.scale.set(.78,.78,.78);\nconst obstacles=[],coins=[],vehicles=[];\nfunction obstacle(x,z,type){const g=new THREE.Group();const m=mat(type==="barrier"?0xf97316:0x7c3aed);const b=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.8),m);b.position.y=.45;b.castShadow=true;g.add(b);if(type==="barrier"){const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.35,.12,.84),mat(0xffffff));stripe.position.y=.65;g.add(stripe)}g.position.set(x,0,z);scene.add(g);obstacles.push(g)}\nfunction coin(x,z){const c=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.08,20),mat(0xffd21f));c.rotation.x=Math.PI/2;c.position.set(x,.65,z);c.castShadow=true;scene.add(c);coins.push(c)}\nfor(let z=-18;z>-230;z-=18){const lane=(Math.floor(Math.abs(z)/18)%3)-1; obstacle(lane*2.05,z,"barrier"); coin(-lane*2.05,z-6); if(z%36===0) coin(0,z-9)}\nfunction vehicle(x,z,type="car"){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.25,.42,2.15),mat(type==="bike"?0x16a34a:0xdc2626));body.position.y=.55;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(.9,.42,.95),mat(0x334155));cabin.position.set(0,.88,.05);cabin.castShadow=true;g.add(cabin);if(type==="bike"){const w=new THREE.Mesh(new THREE.TorusGeometry(.28,.07,8,16),mat(0x111827));w.rotation.y=Math.PI/2;w.position.set(0,.3,.72);g.add(w);const w2=w.clone();w2.position.z=-.72;g.add(w2)}else{for(const xx of [-.65,.65])for(const zz of [-.68,.68]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.12,12),mat(0x111827));w.rotation.z=Math.PI/2;w.position.set(xx,.32,zz);g.add(w)}}g.position.set(x,.05,z);scene.add(g);vehicles.push({g,type,sold:false,price:type==="bike"?80:180});}\nvehicle(-2.1,-12,"car");vehicle(2.1,-42,"car");vehicle(0,-78,"bike");vehicle(-2.1,-120,"car");\nfor(const v of vehicles){v.broken=true;v.repairCost=v.type==="bike"?35:70;}
+const runner=new THREE.Group(); runner.position.set(0,0,3);
+runner.scale.set(.78,.78,.78);
+const obstacles=[],coins=[],vehicles=[];
+function obstacle(x,z,type){const g=new THREE.Group();const m=mat(type==="barrier"?0xf97316:0x7c3aed);const b=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.8),m);b.position.y=.45;b.castShadow=true;g.add(b);if(type==="barrier"){const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.35,.12,.84),mat(0xffffff));stripe.position.y=.65;g.add(stripe)}g.position.set(x,0,z);scene.add(g);obstacles.push(g)}
+function coin(x,z){const c=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.08,20),mat(0xffd21f));c.rotation.x=Math.PI/2;c.position.set(x,.65,z);c.castShadow=true;scene.add(c);coins.push(c)}
+for(let z=-18;z>-230;z-=18){const lane=(Math.floor(Math.abs(z)/18)%3)-1; obstacle(lane*2.05,z,"barrier"); coin(-lane*2.05,z-6); if(z%36===0) coin(0,z-9)}
+function vehicle(x,z,type="car"){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.25,.42,2.15),mat(type==="bike"?0x16a34a:0xdc2626));body.position.y=.55;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(.9,.42,.95),mat(0x334155));cabin.position.set(0,.88,.05);cabin.castShadow=true;g.add(cabin);if(type==="bike"){const w=new THREE.Mesh(new THREE.TorusGeometry(.28,.07,8,16),mat(0x111827));w.rotation.y=Math.PI/2;w.position.set(0,.3,.72);g.add(w);const w2=w.clone();w2.position.z=-.72;g.add(w2)}else{for(const xx of [-.65,.65])for(const zz of [-.68,.68]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.12,12),mat(0x111827));w.rotation.z=Math.PI/2;w.position.set(xx,.32,zz);g.add(w)}}g.position.set(x,.05,z);scene.add(g);vehicles.push({g,type,sold:false,price:type==="bike"?80:180});}
+vehicle(-2.1,-12,"car");vehicle(2.1,-42,"car");vehicle(0,-78,"bike");vehicle(-2.1,-120,"car");
+for(const v of vehicles){v.broken=true;v.repairCost=v.type==="bike"?35:70;}
 function mat(c){return new THREE.MeshStandardMaterial({color:c})}
 const skin=mat(0xf0b38c), shirt=mat(0x2468d8), pants=mat(0x252b38), shoes=mat(0xeeeeee);
 const torso=new THREE.Mesh(new THREE.BoxGeometry(.75,1.15,.45),shirt);torso.position.y=1.75;torso.castShadow=true;runner.add(torso);
@@ -78,7 +86,7 @@ function animate(now){
  runTime+=dt*10;
  // continuous forward running
  runner.position.z-=dt*5.2;
- runner.position.x+=joyX*dt*5;
+ runner.position.x+=joyX*dt*7;
  runner.position.x=Math.max(-2.7,Math.min(2.7,runner.position.x));
  runner.rotation.y=-joyX*.18;
  const swing=Math.sin(runTime)*.85;
@@ -97,6 +105,8 @@ function animate(now){
  renderer.render(scene,camera);requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
+document.getElementById("repairVehicle").addEventListener("click",()=>{const v=vehicles.find(v=>!v.sold&&Math.abs(v.g.position.z-runner.position.z)<2&&Math.abs(v.g.position.x-runner.position.x)<1.6);if(v&&v.broken&&money>=v.repairCost){money-=v.repairCost;v.broken=false;document.getElementById("money").textContent=money;v.g.children[0].material.color.setHex(0x2563eb);}});
+document.getElementById("sellVehicle").addEventListener("click",()=>{const v=vehicles.find(v=>!v.sold&&Math.abs(v.g.position.z-runner.position.z)<2&&Math.abs(v.g.position.x-runner.position.x)<1.6);if(v&&!v.broken){money+=v.price;document.getElementById("money").textContent=money;v.sold=true;scene.remove(v.g);}});
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
 <script>document.getElementById("play").addEventListener("click",()=>{const s=document.getElementById("start");s.style.opacity="0";setTimeout(()=>s.remove(),350)});</script></body></html>
