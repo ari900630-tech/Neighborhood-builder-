@@ -1,66 +1,122 @@
 <!doctype html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#102a43"><title>בונה השכונה</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f7f9fc">
+<title>בונה השכונה</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:#0d1b2a;color:#17202a;touch-action:none}
-#app{width:100%;height:100%;position:relative;background:#dce7d1}
+:root{--ink:#172033;--muted:#718096;--line:#e8edf3;--card:#fff;--accent:#315efb;--green:#42a86b;--bg:#eef3ee}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);touch-action:none}
+#app{position:relative;width:100%;height:100%;overflow:hidden;background:#dcebd5}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.top{position:absolute;top:0;left:0;right:0;height:72px;background:linear-gradient(135deg,#102a43f5,#1b4965f5);color:white;display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 4px 18px #0004;z-index:5}
-.brand{font-weight:900;font-size:19px;min-width:120px}.stats{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:wrap}.pill{background:#ffffff18;border:1px solid #ffffff25;border-radius:14px;padding:8px 11px;font-size:13px;white-space:nowrap}.top button,.round{border:0;background:#ffffff16;color:#fff;border-radius:12px;padding:10px 12px;font-weight:800}
-.toolbar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:6;background:#ffffffee;border:1px solid #ffffff;border-radius:22px;padding:8px;display:flex;gap:6px;box-shadow:0 10px 35px #0003;max-width:calc(100% - 18px);overflow:auto}
-.tool{min-width:72px;border:0;background:#f2f5f7;border-radius:15px;padding:8px 9px;font-weight:800;color:#243b53}.tool b{display:block;font-size:21px}.tool small{display:block;font-size:10px;margin-top:2px}.tool.active{background:#102a43;color:white;box-shadow:0 4px 12px #102a4366}
-.panel{position:absolute;z-index:7;right:12px;top:84px;width:290px;max-width:calc(100% - 24px);background:#fffffff5;border-radius:20px;box-shadow:0 12px 35px #0003;padding:16px;display:none}.panel.show{display:block}.panel h3{margin:0 0 10px}.panel p{margin:6px 0;color:#52606d;font-size:13px}.row{display:flex;gap:8px;margin-top:10px}.action{flex:1;border:0;border-radius:12px;padding:11px;font-weight:800;background:#e8eef2;color:#243b53}.action.primary{background:#102a43;color:white}
-.toast{position:absolute;z-index:20;top:84px;left:50%;transform:translateX(-50%) translateY(-10px);background:#102a43;color:#fff;padding:11px 16px;border-radius:14px;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 8px 25px #0004;font-weight:700}.toast.on{opacity:1;transform:translateX(-50%)}
-.help{position:absolute;left:12px;top:84px;background:#ffffffdc;border-radius:16px;padding:9px 12px;font-size:12px;z-index:4;box-shadow:0 6px 20px #0002;color:#486581}
-@media(max-width:700px){.top{height:64px;padding:7px 8px}.brand{font-size:15px;min-width:92px}.pill{padding:6px 8px;font-size:11px}.top button{padding:8px}.help{top:72px}.panel{top:72px}.toolbar{bottom:7px;border-radius:18px}.tool{min-width:62px}}
-</style></head>
+.top{position:absolute;top:12px;left:12px;right:12px;height:62px;z-index:5;display:flex;align-items:center;gap:12px;padding:8px 12px;background:#ffffffee;border:1px solid #fff;border-radius:20px;box-shadow:0 8px 28px #23304418;backdrop-filter:blur(12px)}
+.logo{font-size:16px;font-weight:900;white-space:nowrap}.logo span{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:1px}
+.stats{display:flex;gap:7px;flex:1;justify-content:center}.stat{min-width:82px;padding:7px 10px;border:1px solid var(--line);border-radius:13px;background:#f9fbfd;text-align:center;font-size:12px;font-weight:800}.stat b{font-size:13px}
+.topBtn{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:13px;font-size:18px;font-weight:900;color:var(--ink)}
+.tip{position:absolute;top:87px;left:50%;transform:translateX(-50%);z-index:4;background:#ffffffdd;border:1px solid #fff;border-radius:12px;padding:7px 11px;font-size:11px;color:#52606d;box-shadow:0 5px 18px #23304412;white-space:nowrap}
+.menu{position:absolute;right:14px;top:88px;width:270px;z-index:10;background:#fffffff7;border:1px solid #fff;border-radius:20px;padding:15px;box-shadow:0 18px 45px #23304425;display:none}.menu.show{display:block}.menu h3{margin:0 0 4px;font-size:17px}.menu p{margin:0 0 13px;font-size:12px;color:var(--muted)}.menuRow{display:flex;gap:8px}.menu button{flex:1;border:0;border-radius:12px;padding:11px;background:#eef2f7;color:var(--ink);font-weight:800}.menu .primary{background:var(--accent);color:#fff}
+.buildbar{position:absolute;left:50%;bottom:15px;transform:translateX(-50%);z-index:8;width:min(720px,calc(100% - 18px));background:#fffffff2;border:1px solid #fff;border-radius:23px;padding:8px;box-shadow:0 14px 38px #23304428;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.buildbar::-webkit-scrollbar{display:none}
+.tool{flex:0 0 76px;border:0;background:#f5f7fa;color:#344054;border-radius:16px;padding:8px 5px;font-weight:800}.tool .ico{width:38px;height:38px;margin:auto;border-radius:12px;display:grid;place-items:center;background:#fff;font-size:21px;box-shadow:0 2px 7px #2330440b}.tool small{display:block;margin-top:5px;font-size:10px;white-space:nowrap}.tool.active{background:#edf2ff;color:var(--accent);outline:2px solid #dbe4ff}.tool.active .ico{background:#315efb;color:#fff}
+.info{position:absolute;left:14px;bottom:93px;z-index:5;width:190px;background:#ffffffed;border-radius:16px;padding:11px 12px;box-shadow:0 8px 25px #23304415;display:none}.info.show{display:block}.info b{font-size:13px}.info small{display:block;color:var(--muted);margin-top:4px;line-height:1.45}
+.toast{position:absolute;top:88px;left:50%;transform:translate(-50%,-8px);z-index:30;background:#172033;color:#fff;padding:10px 15px;border-radius:13px;opacity:0;pointer-events:none;transition:.2s;font-size:13px;font-weight:800;box-shadow:0 10px 28px #17203344}.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:700px){.top{top:8px;left:8px;right:8px;height:58px;border-radius:18px;padding:6px 8px;gap:7px}.logo{font-size:14px}.logo span{font-size:9px}.stats{gap:4px}.stat{min-width:57px;padding:6px 4px;font-size:10px}.stat b{font-size:11px}.topBtn{width:37px;height:37px}.tip{top:73px;font-size:10px;max-width:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis}.menu{top:74px;right:9px;width:260px}.buildbar{bottom:8px;border-radius:20px}.tool{flex-basis:70px}.info{bottom:86px;left:9px;width:170px}}
+</style>
+</head>
 <body>
-<div id="app"><canvas id="game"></canvas>
-<header class="top"><div class="brand">🏘️ בונה השכונה</div><div class="stats"><div class="pill">💰 <span id="money">12,000</span> ₪</div><div class="pill">👨‍👩‍👧 <span id="pop">18</span></div><div class="pill">⭐ <span id="score">72</span></div><div class="pill">📅 יום <span id="day">1</span></div></div><button id="pause">Ⅱ</button><button id="settings">⚙️</button></header>
-<div class="help">גרור כדי להזיז • צבוט כדי להתקרב/להתרחק • בחר בניין ולחץ על שטח פנוי</div>
-<div id="panel" class="panel"><h3 id="panelTitle">הגדרות</h3><p id="panelText">נהל את השכונה שלך.</p><div class="row"><button class="action" id="save">💾 שמור</button><button class="action" id="load">↩️ טען</button></div><div class="row"><button class="action" id="reset">♻️ התחל מחדש</button><button class="action primary" id="close">סגור</button></div></div>
+<div id="app">
+<canvas id="game"></canvas>
+<header class="top">
+  <div class="logo">🏘️ בונה השכונה<span>העיר שלך. הכל בידיים שלך.</span></div>
+  <div class="stats">
+    <div class="stat">💰 <b id="money">12,000</b><br>₪</div>
+    <div class="stat">👨‍👩‍👧 <b id="pop">18</b><br>תושבים</div>
+    <div class="stat">⭐ <b id="score">72</b><br>דירוג</div>
+    <div class="stat">☀️ יום <b id="day">1</b></div>
+  </div>
+  <button class="topBtn" id="pause" aria-label="השהה">Ⅱ</button>
+  <button class="topBtn" id="settings" aria-label="הגדרות">⚙️</button>
+</header>
+<div class="tip">גרור את המפה כדי לטייל • בחר מבנה ולחץ על שטח פנוי</div>
+<div id="menu" class="menu">
+  <h3>ניהול השכונה</h3><p>שמור את ההתקדמות שלך או התחל שכונה חדשה.</p>
+  <div class="menuRow"><button id="save">💾 שמור</button><button id="load">↩️ טען</button></div>
+  <div class="menuRow" style="margin-top:8px"><button id="reset">♻️ התחל מחדש</button><button class="primary" id="close">סגור</button></div>
+</div>
+<div id="info" class="info"><b id="infoTitle">בחר מבנה</b><small id="infoText">לחץ על מבנה שכבר בנית כדי לראות פרטים.</small></div>
 <div id="toast" class="toast"></div>
-<nav class="toolbar">
-<button class="tool active" data-tool="select"><b>👆</b><small>בחירה</small></button>
-<button class="tool" data-tool="road"><b>🛣️</b><small>כביש 250₪</small></button>
-<button class="tool" data-tool="house"><b>🏠</b><small>בית 1,200₪</small></button>
-<button class="tool" data-tool="apartment"><b>🏢</b><small>בניין 3,500₪</small></button>
-<button class="tool" data-tool="shop"><b>🏪</b><small>חנות 2,200₪</small></button>
-<button class="tool" data-tool="park"><b>🌳</b><small>פארק 900₪</small></button>
-<button class="tool" data-tool="school"><b>🏫</b><small>בית ספר 4,000₪</small></button>
-<button class="tool" data-tool="bulldoze"><b>🗑️</b><small>הריסה</small></button>
-</nav></div>
+<nav class="buildbar" id="buildbar"></nav>
+</div>
 <script>
-const c=document.getElementById('game'),ctx=c.getContext('2d');let W,H,DPR;
-const S={money:12000,pop:18,score:72,day:1,paused:false,tool:'select',zoom:1,ox:0,oy:0,drag:false,lastX:0,lastY:0,objects:[],selected:null,visitors:[]};
-const types={road:{cost:250,w:2,h:1,color:'#7b8794',icon:'🛣️'},house:{cost:1200,w:1,h:1,color:'#f2c14e',icon:'🏠'},apartment:{cost:3500,w:1.4,h:1.4,color:'#8ecae6',icon:'🏢'},shop:{cost:2200,w:1,h:1,color:'#ef8354',icon:'🏪'},park:{cost:900,w:1.3,h:1.3,color:'#70a288',icon:'🌳'},school:{cost:4000,w:1.5,h:1.3,color:'#9b8afb',icon:'🏫'}};
-function resize(){DPR=devicePixelRatio||1;W=innerWidth;H=innerHeight;c.width=W*DPR;c.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);if(!S.ox){S.ox=W/2;S.oy=H/2+20}draw()}addEventListener('resize',resize);
-function gridToScreen(gx,gy){const size=64*S.zoom;return{x:S.ox+(gx-gy)*size/2,y:S.oy+(gx+gy)*size/4}}
-function screenToGrid(x,y){const size=64*S.zoom;const a=(x-S.ox)/(size/2),b=(y-S.oy)/(size/4);return{x:Math.floor((a+b)/2),y:Math.floor((b-a)/2)}}
-function diamond(x,y,w,h,fill,stroke){ctx.beginPath();ctx.moveTo(x,y-h/2);ctx.lineTo(x+w/2,y);ctx.lineTo(x,y+h/2);ctx.lineTo(x-w/2,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke||'#0002';ctx.stroke()}
-function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#b9d6a8';ctx.fillRect(0,0,W,H);const size=64*S.zoom;
-for(let gx=-12;gx<13;gx++)for(let gy=-12;gy<13;gy++){let p=gridToScreen(gx,gy);diamond(p.x,p.y,size,size/2,(gx+gy)%2?'#c7dfb6':'#c2d9b0','#ffffff55')}
-S.objects.forEach(o=>drawObj(o));drawPreview();drawVisitors()}
-function drawObj(o){let p=gridToScreen(o.x,o.y),t=types[o.type],w=sizeFor(t.w),h=sizeFor(t.h);if(o.type==='road'){diamond(p.x,p.y,w,h,t.color,'#52606d')}else{diamond(p.x,p.y,w,h,'#0002','#0002');ctx.fillStyle=t.color;ctx.fillRect(p.x-w*.28,p.y-h*.7,w*.56,h*.7);ctx.font=Math.max(18,25*S.zoom)+'px serif';ctx.textAlign='center';ctx.fillText(t.icon,p.x,p.y-h*.2);ctx.fillStyle='#ffffffcc';ctx.fillRect(p.x-w*.28,p.y-h*.58,w*.56,5);ctx.fillStyle='#fff';ctx.fillRect(p.x-w*.2,p.y-h*.48,7,7);ctx.fillRect(p.x+w*.08,p.y-h*.48,7,7)}if(S.selected===o){ctx.strokeStyle='#fff';ctx.lineWidth=4;diamond(p.x,p.y,w+8,h+8,'transparent','#fff');ctx.lineWidth=1}}
-function sizeFor(v){return 64*S.zoom*v}
-function drawPreview(){if(S.tool==='select'||S.tool==='bulldoze'||!S.preview)return;let p=gridToScreen(S.preview.x,S.preview.y),t=types[S.tool];diamond(p.x,p.y,sizeFor(t.w),sizeFor(t.h),'#ffffff55','#fff');ctx.font='25px serif';ctx.textAlign='center';ctx.fillText(t.icon,p.x,p.y+8)}
-function drawVisitors(){ctx.font='16px serif';S.visitors.forEach(v=>{let p=gridToScreen(v.x,v.y);ctx.fillText(v.icon,p.x,p.y-5)})}
-function occupied(x,y,w=1,h=1){return S.objects.some(o=>Math.abs(o.x-x)<(w+types[o.type].w)/2&&Math.abs(o.y-y)<(h+types[o.type].h)/2)}
-function place(x,y){let t=types[S.tool];if(!t)return;if(S.tool==='bulldoze'){let i=S.objects.findIndex(o=>Math.abs(o.x-x)<.7&&Math.abs(o.y-y)<.7);if(i>=0){S.objects.splice(i,1);toast('המבנה נהרס');S.pop=Math.max(0,S.pop-1);update()}return}if(S.money<t.cost){toast('אין מספיק כסף');return}if(occupied(x,y,t.w,t.h)){toast('השטח תפוס');return}S.money-=t.cost;S.objects.push({x,y,type:S.tool,id:Date.now()});if(S.tool==='house')S.pop+=4;if(S.tool==='apartment')S.pop+=14;if(S.tool==='school')S.score+=4;if(S.tool==='park')S.score+=3;S.score=Math.min(100,S.score+1);toast(t.icon+' נבנה בהצלחה');update()}
-function update(){money.textContent=S.money.toLocaleString('he-IL');pop.textContent=S.pop;score.textContent=S.score;day.textContent=S.day}
-function toast(s){const el=document.getElementById('toast');el.textContent=s;el.classList.add('on');clearTimeout(window.tt);window.tt=setTimeout(()=>el.classList.remove('on'),1500)}
-document.querySelectorAll('.tool').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tool').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.tool=b.dataset.tool;S.preview=null});
-c.addEventListener('pointerdown',e=>{S.drag=true;S.lastX=e.clientX;S.lastY=e.clientY;c.setPointerCapture(e.pointerId)});
-c.addEventListener('pointermove',e=>{if(S.drag&&S.tool==='select'){S.ox+=e.clientX-S.lastX;S.oy+=e.clientY-S.lastY}S.lastX=e.clientX;S.lastY=e.clientY;let g=screenToGrid(e.clientX,e.clientY);S.preview=g;draw()});
-c.addEventListener('pointerup',e=>{S.drag=false;if(S.tool!=='select'){let g=screenToGrid(e.clientX,e.clientY);place(g.x,g.y)}});
-c.addEventListener('wheel',e=>{e.preventDefault();S.zoom=Math.max(.55,Math.min(1.8,S.zoom*(e.deltaY<0?1.1:.9)));draw()},{passive:false});
-let touchDist=0;c.addEventListener('touchmove',e=>{if(e.touches.length===2){let a=e.touches[0],b=e.touches[1],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(touchDist){S.zoom=Math.max(.55,Math.min(1.8,S.zoom*d/touchDist));draw()}touchDist=d}},{passive:false});c.addEventListener('touchend',()=>touchDist=0);
-pause.onclick=()=>{S.paused=!S.paused;pause.textContent=S.paused?'▶':'Ⅱ';toast(S.paused?'המשחק מושהה':'המשחק ממשיך')};
-settings.onclick=()=>panel.classList.toggle('show');close.onclick=()=>panel.classList.remove('show');
-save.onclick=()=>{localStorage.nbSave=JSON.stringify({money:S.money,pop:S.pop,score:S.score,day:S.day,objects:S.objects});toast('השכונה נשמרה')};
-load.onclick=()=>{try{let x=JSON.parse(localStorage.nbSave);Object.assign(S,x);toast('השכונה נטענה');update();draw()}catch(e){toast('אין שמירה זמינה')}};
-reset.onclick=()=>{if(confirm('להתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.day=1;S.objects=[];update();draw();toast('התחלת מחדש')}};
-function tick(){if(!S.paused){S.day+=.01;if(S.day>30)S.day=1; if(Math.random()<.015&&S.objects.length){S.money+=30;toast('💰 הכנסה מהשכונה +30₪')}if(Math.random()<.02){S.visitors.push({x:Math.floor(Math.random()*9)-4,y:Math.floor(Math.random()*9)-4,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>14)S.visitors.shift()}update();draw()}requestAnimationFrame(tick)}update();resize();tick();
-</script></body></html>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+let W=0,H=0,DPR=1;
+const S={money:12000,pop:18,score:72,day:1,paused:false,tool:'select',zoom:.95,ox:0,oy:0,dragging:false,moved:false,lastX:0,lastY:0,preview:null,selected:null,objects:[],visitors:[],incomeTimer:0};
+const types={
+ road:{cost:250,w:2,h:1,color:'#9aa5b1',icon:'🛣️',name:'כביש',desc:'מחבר את השכונה ומעלה נוחות.'},
+ house:{cost:1200,w:1,h:1,color:'#f4c95d',icon:'🏠',name:'בית פרטי',desc:'+4 תושבים'},
+ apartment:{cost:3500,w:1.4,h:1.4,color:'#70b7d6',icon:'🏢',name:'בניין מגורים',desc:'+14 תושבים'},
+ shop:{cost:2200,w:1,h:1,color:'#e88963',icon:'🏪',name:'חנות',desc:'מוסיפה הכנסה לתקציב.'},
+ park:{cost:900,w:1.3,h:1.3,color:'#62a878',icon:'🌳',name:'פארק',desc:'מעלה את איכות החיים.'},
+ school:{cost:4000,w:1.5,h:1.3,color:'#9b8ee8',icon:'🏫',name:'בית ספר',desc:'מעלה את דירוג השכונה.'},
+ road2:{cost:450,w:1,h:1,color:'#9aa5b1',icon:'↕️',name:'צומת',desc:'קטע כביש קצר.'}
+};
+const tools=['select','road','house','apartment','shop','park','school','bulldoze'];
+const labels={select:['👆','בחירה',''],road:['🛣️','כביש','250₪'],house:['🏠','בית','1,200₪'],apartment:['🏢','בניין','3,500₪'],shop:['🏪','חנות','2,200₪'],park:['🌳','פארק','900₪'],school:['🏫','בית ספר','4,000₪'],bulldoze:['⌫','הריסה','']};
+const bar=document.getElementById('buildbar');
+tools.forEach(t=>{const b=document.createElement('button');b.className='tool'+(t==='select'?' active':'');b.dataset.tool=t;const l=labels[t];b.innerHTML='<div class="ico">'+l[0]+'</div><small>'+l[1]+(l[2]?'<br>'+l[2]:'')+'</small>';b.onclick=()=>selectTool(t);bar.appendChild(b)});
+function selectTool(t){S.tool=t;S.preview=null;document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));hideInfo();draw()}
+function resize(){DPR=devicePixelRatio||1;W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);if(!S.ox){S.ox=W/2;S.oy=H/2+25}draw()}
+addEventListener('resize',resize);
+function cell(){return 62*S.zoom}
+function toScreen(x,y){const s=cell();return{x:S.ox+(x-y)*s/2,y:S.oy+(x+y)*s/4}}
+function toGrid(x,y){const s=cell(),a=(x-S.ox)/(s/2),b=(y-S.oy)/(s/4);return{x:Math.floor((a+b)/2),y:Math.floor((b-a)/2)}}
+function diamond(x,y,w,h,fill,stroke='#0001'){ctx.beginPath();ctx.moveTo(x,y-h/2);ctx.lineTo(x+w/2,y);ctx.lineTo(x,y+h/2);ctx.lineTo(x-w/2,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.stroke()}
+function draw(){
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#cfe3c4';ctx.fillRect(0,0,W,H);
+ const s=cell();
+ for(let x=-15;x<=15;x++)for(let y=-15;y<=15;y++){const p=toScreen(x,y);diamond(p.x,p.y,s,s/2,(x+y)%2?'#d8e9cf':'#d2e5c9','#ffffff65')}
+ drawRoadHints();[...S.objects].sort((a,b)=>(a.x+a.y)-(b.x+b.y)).forEach(drawObject);if(S.preview)drawPreview();drawVisitors();
+}
+function drawRoadHints(){for(let i=-9;i<=9;i+=3){const a=toScreen(i,-10),b=toScreen(i,10);ctx.strokeStyle='#ffffff28';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
+function drawObject(o){
+ const t=types[o.type],p=toScreen(o.x,o.y),w=cell()*t.w,h=cell()*t.h;
+ if(o.type==='road'){diamond(p.x,p.y,w,h,'#929ca7','#66717d');ctx.strokeStyle='#e9edf1';ctx.setLineDash([7,6]);ctx.beginPath();ctx.moveTo(p.x-w*.32,p.y);ctx.lineTo(p.x+w*.32,p.y);ctx.stroke();ctx.setLineDash([])}
+ else{
+  diamond(p.x,p.y,w,h,'#b6c8ad','#ffffff50');
+  ctx.fillStyle=t.color;ctx.beginPath();ctx.roundRect(p.x-w*.28,p.y-h*.62,w*.56,h*.64,8);ctx.fill();
+  ctx.font=Math.max(20,27*S.zoom)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t.icon,p.x,p.y-h*.22);
+  ctx.fillStyle='#ffffffaa';ctx.fillRect(p.x-w*.18,p.y-h*.43,8,7);ctx.fillRect(p.x+w*.06,p.y-h*.43,8,7);
+ }
+ if(S.selected===o){ctx.lineWidth=3;diamond(p.x,p.y,w+10,h+10,'transparent','#315efb');ctx.lineWidth=1}
+}
+function drawPreview(){const t=types[S.tool];if(!t)return;const p=toScreen(S.preview.x,S.preview.y);diamond(p.x,p.y,cell()*t.w,cell()*t.h,'#315efb38','#315efb99');ctx.font='24px serif';ctx.textAlign='center';ctx.fillText(t.icon,p.x,p.y)}
+function drawVisitors(){ctx.font='17px serif';S.visitors.forEach(v=>{const p=toScreen(v.x,v.y);ctx.fillText(v.icon,p.x,p.y-6)})}
+function occupied(x,y,w,h){return S.objects.some(o=>Math.abs(o.x-x)<(w+types[o.type].w)/2-.08&&Math.abs(o.y-y)<(h+types[o.type].h)/2-.08)}
+function place(x,y){
+ if(S.tool==='bulldoze'){const i=S.objects.findIndex(o=>Math.abs(o.x-x)<.75&&Math.abs(o.y-y)<.75);if(i<0){toast('אין כאן מבנה להריסה');return}const o=S.objects[i],refund=Math.floor(types[o.type].cost*.35);S.objects.splice(i,1);S.money+=refund;if(o.type==='house')S.pop=Math.max(0,S.pop-4);if(o.type==='apartment')S.pop=Math.max(0,S.pop-14);S.score=Math.max(0,S.score-1);toast('המבנה נהרס • הוחזרו '+refund.toLocaleString('he-IL')+'₪');update();return}
+ if(S.tool==='select'){selectAt(x,y);return}
+ const t=types[S.tool];if(!t)return;if(S.money<t.cost){toast('צריך עוד '+(t.cost-S.money).toLocaleString('he-IL')+'₪');return}if(occupied(x,y,t.w,t.h)){toast('השטח תפוס');return}
+ const o={x,y,type:S.tool,id:Date.now()};S.money-=t.cost;S.objects.push(o);
+ if(S.tool==='house')S.pop+=4;if(S.tool==='apartment')S.pop+=14;if(S.tool==='school')S.score+=5;if(S.tool==='park')S.score+=3;if(S.tool==='shop')S.score+=2;
+ S.score=Math.min(100,S.score+1);S.selected=o;toast(t.icon+' '+t.name+' נבנה');update();
+}
+function selectAt(x,y){let found=S.objects.findLast(o=>Math.abs(o.x-x)<.8&&Math.abs(o.y-y)<.8);if(found){S.selected=found;const t=types[found.type];document.getElementById('infoTitle').textContent=t.icon+' '+t.name;document.getElementById('infoText').textContent=t.desc+' • עלות: '+t.cost.toLocaleString('he-IL')+'₪';document.getElementById('info').classList.add('show')}else hideInfo();draw()}
+function hideInfo(){S.selected=null;document.getElementById('info').classList.remove('show')}
+function update(){document.getElementById('money').textContent=Math.floor(S.money).toLocaleString('he-IL');document.getElementById('pop').textContent=S.pop;document.getElementById('score').textContent=Math.floor(S.score);document.getElementById('day').textContent=Math.floor(S.day)}
+function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('on');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>e.classList.remove('on'),1700)}
+canvas.addEventListener('pointerdown',e=>{S.dragging=true;S.moved=false;S.lastX=e.clientX;S.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{const dx=e.clientX-S.lastX,dy=e.clientY-S.lastY;if(S.dragging&&(S.tool==='select'||e.buttons)){if(Math.abs(dx)+Math.abs(dy)>4)S.moved=true;if(S.tool==='select'){S.ox+=dx;S.oy+=dy}}S.lastX=e.clientX;S.lastY=e.clientY;S.preview=toGrid(e.clientX,e.clientY);draw()});
+canvas.addEventListener('pointerup',e=>{S.dragging=false;if(!S.moved){const g=toGrid(e.clientX,e.clientY);place(g.x,g.y)}});
+canvas.addEventListener('wheel',e=>{e.preventDefault();const before=toGrid(e.clientX,e.clientY);S.zoom=Math.max(.55,Math.min(1.75,S.zoom*(e.deltaY<0?1.08:.92)));const after=toScreen(before.x,before.y);S.ox+=e.clientX-after.x;S.oy+=e.clientY-after.y;draw()},{passive:false});
+let pinch=0;canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){e.preventDefault();const a=e.touches[0],b=e.touches[1],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pinch){S.zoom=Math.max(.55,Math.min(1.75,S.zoom*d/pinch);draw()}pinch=d}},{passive:false});canvas.addEventListener('touchend',()=>pinch=0);
+document.getElementById('pause').onclick=()=>{S.paused=!S.paused;document.getElementById('pause').textContent=S.paused?'▶':'Ⅱ';toast(S.paused?'המשחק מושהה':'המשחק ממשיך')};
+document.getElementById('settings').onclick=()=>document.getElementById('menu').classList.toggle('show');
+document.getElementById('close').onclick=()=>document.getElementById('menu').classList.remove('show');
+document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,day:S.day,objects:S.objects});toast('השכונה נשמרה במכשיר')};
+document.getElementById('load').onclick=()=>{try{Object.assign(S,JSON.parse(localStorage.nbNeighborhood));update();draw();toast('השכונה נטענה')}catch(e){toast('אין שמירה זמינה')}};
+document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.day=1;S.objects=[];S.visitors=[];update();draw();toast('שכונה חדשה מוכנה')}};
+function tick(){if(!S.paused){S.day+=.003;S.incomeTimer++;if(S.incomeTimer>180){S.incomeTimer=0;const shops=S.objects.filter(o=>o.type==='shop').length;const parks=S.objects.filter(o=>o.type==='park').length;const income=25+shops*35+parks*8;S.money+=income;if(shops)toast('💰 הכנסה מהשכונה +'+income+'₪');if(Math.random()<.5)S.visitors.push({x:Math.floor(Math.random()*11)-5,y:Math.floor(Math.random()*11)-5,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>12)S.visitors.shift();update()}draw()}requestAnimationFrame(tick)}
+update();resize();tick();
+</script>
+</body>
+</html>
