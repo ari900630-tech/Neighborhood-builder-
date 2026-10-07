@@ -32,7 +32,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     <div class="stat">💰 <b id="money">12,000</b><br>₪</div>
     <div class="stat">👨‍👩‍👧 <b id="pop">18</b><br>תושבים</div>
     <div class="stat">⭐ <b id="score">72</b><br>דירוג</div>
-    <div class="stat">☀️ יום <b id="day">1</b></div>
+    
   </div>
   <button class="topBtn" id="pause" aria-label="השהה">Ⅱ</button>
   <button class="topBtn" id="settings" aria-label="הגדרות">⚙️</button>
@@ -50,7 +50,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 <script>
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 let W=0,H=0,DPR=1;
-const S={money:12000,pop:18,score:72,day:1,paused:false,tool:'select',zoom:.95,ox:0,oy:0,dragging:false,moved:false,lastX:0,lastY:0,preview:null,selected:null,objects:[],visitors:[],incomeTimer:0};
+const S={money:12000,pop:18,score:72 ,paused:false,tool:'select',zoom:.95,ox:0,oy:0,dragging:false,moved:false,lastX:0,lastY:0,preview:null,selected:null,objects:[],visitors:[],incomeTimer:0};
 const types={
  road:{cost:250,w:2,h:1,color:'#9aa5b1',icon:'🛣️',name:'כביש',desc:'מחבר את השכונה ומעלה נוחות.'},
  house:{cost:1200,w:1,h:1,color:'#f4c95d',icon:'🏠',name:'בית פרטי',desc:'+4 תושבים'},
@@ -112,9 +112,9 @@ let pinch=0;canvas.addEventListener('touchmove',e=>{if(e.touches.length===2){e.p
 document.getElementById('pause').onclick=()=>{S.paused=!S.paused;document.getElementById('pause').textContent=S.paused?'▶':'Ⅱ';toast(S.paused?'המשחק מושהה':'המשחק ממשיך')};
 document.getElementById('settings').onclick=()=>document.getElementById('menu').classList.toggle('show');
 document.getElementById('close').onclick=()=>document.getElementById('menu').classList.remove('show');
-document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,day:S.day,objects:S.objects});toast('השכונה נשמרה במכשיר')};
+document.getElementById('save').onclick=()=>{localStorage.nbNeighborhood=JSON.stringify({money:S.money,pop:S.pop,score:S.score,objects:S.objects});toast('השכונה נשמרה במכשיר')};
 document.getElementById('load').onclick=()=>{try{Object.assign(S,JSON.parse(localStorage.nbNeighborhood));update();draw();toast('השכונה נטענה')}catch(e){toast('אין שמירה זמינה')}};
-document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.day=1;S.objects=[];S.visitors=[];update();draw();toast('שכונה חדשה מוכנה')}};
+document.getElementById('reset').onclick=()=>{if(confirm('למחוק את השכונה ולהתחיל מחדש?')){S.money=12000;S.pop=18;S.score=72;S.objects=[];S.visitors=[];update();draw();toast('שכונה חדשה מוכנה')}};
 function tick(){if(!S.paused){S.day+=.003;S.incomeTimer++;if(S.incomeTimer>180){S.incomeTimer=0;const shops=S.objects.filter(o=>o.type==='shop').length;const parks=S.objects.filter(o=>o.type==='park').length;const income=25+shops*35+parks*8;S.money+=income;if(shops)toast('💰 הכנסה מהשכונה +'+income+'₪');if(Math.random()<.5)S.visitors.push({x:Math.floor(Math.random()*11)-5,y:Math.floor(Math.random()*11)-5,icon:Math.random()<.5?'🚶':'🚶‍♀️'});if(S.visitors.length>12)S.visitors.shift();update()}draw()}requestAnimationFrame(tick)}
 update();resize();tick();
 </script>
