@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>רץ 3D</title>
 <style>
+#mission{background:rgba(15,23,42,.78);box-shadow:0 6px 20px #0004} .flash{animation:flash .18s 2}@keyframes flash{50%{transform:translateX(-50%) scale(1.12)}}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif;touch-action:none}
 #scene{position:fixed;inset:0}canvas{display:block}
 .hud{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:5;color:white;font-weight:800;font-size:17px}
@@ -21,7 +22,10 @@
 </head>
 <body>
 <div id="scene"></div><div id="title">ריצה בפארק</div><div id="start"><div class="panel"><h1>ריצה בפארק</h1><p>הדמות רצה קדימה. השתמש בג׳ויסטיק כדי לפנות.</p><button id="play">התחל לרוץ</button></div></div>
-<div class="hud"><div class="badge">רץ 3D</div><div class="badge">מטבעות: <span id="money">0</span></div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div><div id="vehicleAction" style="display:none;position:fixed;bottom:170px;left:50%;transform:translateX(-50%);z-index:15;gap:8px"><button id="repairVehicle" style="border:0;border-radius:16px;padding:13px 18px;background:#2563eb;color:#fff;font-size:16px;font-weight:800;box-shadow:0 8px 25px #0005">תקן רכב</button><button id="sellVehicle" style="border:0;border-radius:16px;padding:13px 18px;background:#16a34a;color:#fff;font-size:16px;font-weight:800;box-shadow:0 8px 25px #0005">מכור רכב</button></div>
+<div class="hud"><div class="badge">רמה: <span id="level">1</span>/100</div><div class="badge">חיים: <span id="health">3</span> • מטבעות: <span id="money">0</span></div><div class="badge">מרחק: <span id="distance">0</span> מ׳</div></div>
+<div id="mission" class="badge" style="position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:6;color:#fff">משימה: אסוף 10 מטבעות</div>
+<div id="power" class="badge" style="display:none;position:fixed;top:112px;left:50%;transform:translateX(-50%);z-index:6;color:#fff"></div>
+<div id="gameOver" style="display:none;position:fixed;inset:0;z-index:30;align-items:center;justify-content:center;background:#0009"><div class="panel"><h1>הפסדת</h1><p id="overText"></p><button id="restart" style="border:0;border-radius:14px;padding:13px 28px;background:#dc2626;color:#fff;font-size:18px;font-weight:800">נסה שוב</button></div></div><div id="vehicleAction" style="display:none;position:fixed;bottom:170px;left:50%;transform:translateX(-50%);z-index:15;gap:8px"><button id="repairVehicle" style="border:0;border-radius:16px;padding:13px 18px;background:#2563eb;color:#fff;font-size:16px;font-weight:800;box-shadow:0 8px 25px #0005">תקן רכב</button><button id="sellVehicle" style="border:0;border-radius:16px;padding:13px 18px;background:#16a34a;color:#fff;font-size:16px;font-weight:800;box-shadow:0 8px 25px #0005">מכור רכב</button></div>
 <div id="hint">הדמות רצה אוטומטית • גרור את הג׳ויסטיק כדי לפנות</div>
 <div id="joystick"><div id="stick"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -53,10 +57,13 @@ for(let z=0;z>-220;z-=12){tree(-6-Math.random()*4,z);tree(6+Math.random()*4,z-5)
 
 const runner=new THREE.Group(); runner.position.set(0,0,3);
 runner.scale.set(.78,.78,.78);
-const obstacles=[],coins=[],vehicles=[];
+const obstacles=[],coins=[],vehicles=[],powerups=[],rivals=[];
 function obstacle(x,z,type){const g=new THREE.Group();const m=mat(type==="barrier"?0xf97316:0x7c3aed);const b=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.8),m);b.position.y=.45;b.castShadow=true;g.add(b);if(type==="barrier"){const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.35,.12,.84),mat(0xffffff));stripe.position.y=.65;g.add(stripe)}g.position.set(x,0,z);scene.add(g);obstacles.push(g)}
 function coin(x,z){const c=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.08,20),mat(0xffd21f));c.rotation.x=Math.PI/2;c.position.set(x,.65,z);c.castShadow=true;scene.add(c);coins.push(c)}
 for(let z=-18;z>-230;z-=18){const lane=(Math.floor(Math.abs(z)/18)%3)-1; obstacle(lane*2.05,z,"barrier"); coin(-lane*2.05,z-6); if(z%36===0) coin(0,z-9)}
+function powerup(x,z,type){const color=type==="shield"?0x38bdf8:type==="boost"?0xf97316:0xa855f7;const p=new THREE.Mesh(new THREE.OctahedronGeometry(.42),mat(color));p.position.set(x,.7,z);p.castShadow=true;p.userData.type=type;scene.add(p);powerups.push(p)}
+function rival(x,z){const r=new THREE.Mesh(new THREE.CapsuleGeometry(.35,.8,6,10),mat(0xef4444));r.position.set(x,.9,z);r.castShadow=true;scene.add(r);rivals.push(r)}
+for(let z=-30;z>-230;z-=36){powerup((Math.floor(-z/36)%3-1)*2.1,z,"shield");powerup((Math.floor(-z/18)%3-1)*2.1,z-9,"boost");rival((Math.floor(-z/24)%3-1)*2.1,z-12)}
 function vehicle(x,z,type="car"){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.25,.42,2.15),mat(type==="bike"?0x16a34a:0xdc2626));body.position.y=.55;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(.9,.42,.95),mat(0x334155));cabin.position.set(0,.88,.05);cabin.castShadow=true;g.add(cabin);if(type==="bike"){const w=new THREE.Mesh(new THREE.TorusGeometry(.28,.07,8,16),mat(0x111827));w.rotation.y=Math.PI/2;w.position.set(0,.3,.72);g.add(w);const w2=w.clone();w2.position.z=-.72;g.add(w2)}else{for(const xx of [-.65,.65])for(const zz of [-.68,.68]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.12,12),mat(0x111827));w.rotation.z=Math.PI/2;w.position.set(xx,.32,zz);g.add(w)}}g.position.set(x,.05,z);scene.add(g);vehicles.push({g,type,sold:false,price:type==="bike"?80:180});}
 vehicle(-2.1,-12,"car");vehicle(2.1,-42,"car");vehicle(0,-78,"bike");vehicle(-2.1,-120,"car");
 for(const v of vehicles){v.broken=true;v.repairCost=v.type==="bike"?35:70;}
@@ -73,6 +80,7 @@ footL.position.set(-.22,.35,-.18);footR.position.set(.22,.35,-.18);runner.add(fo
 scene.add(runner);
 
 let vx=0,runTime=0,distance=0,last=performance.now(),joyX=0,money=0,gameStarted=false;
+let health=3,level=1,shield=0,boost=0,combo=0,missionCoins=0,nextSpawn=-246,gameEnded=false;
 const joy=document.getElementById('joystick'),stick=document.getElementById('stick');
 let active=false;
 function moveJoy(x,y){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=x-cx,dy=y-cy;const max=42;const d=Math.hypot(dx,dy);if(d>max){dx*=max/d;dy*=max/d}stick.style.transform=`translate(${dx}px,${dy}px)`;joyX=dx/max}
@@ -81,23 +89,51 @@ joy.addEventListener('pointerdown',e=>{active=true;joy.setPointerCapture(e.point
 joy.addEventListener('pointermove',e=>{if(active)moveJoy(e.clientX,e.clientY)});
 joy.addEventListener('pointerup',endJoy);joy.addEventListener('pointercancel',endJoy);
 
+function hit(a,b,rx=1.0,rz=1.25){return Math.abs(a.x-b.x)<rx&&Math.abs(a.z-b.z)<rz}
+function spawnWave(z){
+ const n=Math.floor(Math.abs(z)/12), lanes=[-2.1,0,2.1], lane=lanes[n%3];
+ obstacle(lane,z,n%4===0?"barrier":"block");
+ coin(lanes[(n+1)%3],z-4); coin(lanes[(n+2)%3],z-8);
+ if(n%3===0) powerup(lanes[(n+2)%3],z-12,"shield");
+ if(n%5===0) powerup(lane,z-16,"boost");
+ if(n%4===0) rival(lanes[(n+1)%3],z-18);
+}
+function endGame(){
+ if(gameEnded)return;gameEnded=true;
+ document.getElementById("overText").textContent="הגעת לרמה "+level+" • מרחק "+Math.floor(distance)+" מ׳";
+ document.getElementById("gameOver").style.display="flex";
+}
 function animate(now){
  const dt=Math.min((now-last)/1000,.05);last=now;
  runTime+=dt*10;
- // continuous forward running
- runner.position.z-=dt*5.2;
+ if(gameEnded){renderer.render(scene,camera);return}
+ level=Math.min(100,1+Math.floor(distance/45));
+ const speed=Math.min(12.5,5.2+(level-1)*.075)+(boost>0?3.5:0);
+ runner.position.z-=dt*speed;
+ while(nextSpawn>runner.position.z-260){spawnWave(nextSpawn);nextSpawn-=12}
+ boost=Math.max(0,boost-dt); shield=Math.max(0,shield-dt);
  runner.position.x+=joyX*dt*7;
  runner.position.x=Math.max(-2.7,Math.min(2.7,runner.position.x));
  runner.rotation.y=-joyX*.18;
  const swing=Math.sin(runTime)*.85;
  armL.rotation.x=swing;armR.rotation.x=-swing;legL.rotation.x=-swing;legR.rotation.x=swing;
  torso.position.y=1.75+Math.abs(Math.sin(runTime*2))*.035;
- distance+=dt*5.2;
+ distance+=dt*speed;
  document.getElementById('distance').textContent=Math.floor(distance);
+ document.getElementById('level').textContent=level;
+ document.getElementById('health').textContent=health;
+ const targetMission=Math.min(100,10+Math.floor(level/5)*5);
+ document.getElementById('mission').textContent=missionCoins<targetMission?('משימה: אסוף '+targetMission+' מטבעות • '+missionCoins+'/'+targetMission):('משימה הושלמה • רמה '+level);
+ if(level===100){document.getElementById('mission').textContent='הגעת לרמה 100 — מצב מאסטר!';}
+ for(const c of coins){c.rotation.z+=dt*5;if(!c.userData.taken&&hit(runner.position,c.position,.9,1.1)){c.userData.taken=true;scene.remove(c);money++;missionCoins++;combo++;document.getElementById('money').textContent=money;}}
+ for(const o of obstacles){if(!o.userData.hit&&hit(runner.position,o.position,1.05,1.0)){o.userData.hit=true;if(shield<=0){health--;combo=0;document.body.classList.add('flash');setTimeout(()=>document.body.classList.remove('flash'),350);if(health<=0)endGame();}o.position.z=runner.position.z-30;}}
+ for(const p of powerups){p.rotation.y+=dt*3;if(!p.userData.taken&&hit(runner.position,p.position,1.0,1.0)){p.userData.taken=true;if(p.userData.type==='shield')shield=8;else boost=5;document.getElementById('power').style.display='block';document.getElementById('power').textContent=p.userData.type==='shield'?'מגן פעיל • 8 שניות':'טורבו פעיל • 5 שניות';scene.remove(p);}}
+ for(const r of rivals){r.position.z+=Math.sin(runTime*.7+r.position.x)*dt*.8;if(!r.userData.hit&&hit(runner.position,r.position,.9,1.0)){r.userData.hit=true;if(shield<=0){health--;if(health<=0)endGame();}r.position.z=runner.position.z-35;}}
+ if(shield<=0&&boost<=0)document.getElementById('power').style.display='none';
  // keep camera behind player, smoothly
  camera.position.x+=(runner.position.x*.45-camera.position.x)*dt*4;
  camera.position.z+=(runner.position.z+7.5-camera.position.z)*dt*4;
- camera.position.y+=(8.8-camera.position.y)*dt*4;
+ camera.position.y+=((9.4+level*.008)-camera.position.y)*dt*4;
  camera.lookAt(runner.position.x*.55,.8,runner.position.z-8);
  // recycle scenery by moving camera-relative objects forward
  for(const o of scene.children){if(o.userData && o.userData.scenery){}
@@ -105,8 +141,10 @@ function animate(now){
  renderer.render(scene,camera);requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
+setInterval(()=>{const v=vehicles.find(v=>!v.sold&&Math.abs(v.g.position.z-runner.position.z)<3&&Math.abs(v.g.position.x-runner.position.x)<1.8);document.getElementById('vehicleAction').style.display=v?'flex':'none'},150);
 document.getElementById("repairVehicle").addEventListener("click",()=>{const v=vehicles.find(v=>!v.sold&&Math.abs(v.g.position.z-runner.position.z)<2&&Math.abs(v.g.position.x-runner.position.x)<1.6);if(v&&v.broken&&money>=v.repairCost){money-=v.repairCost;v.broken=false;document.getElementById("money").textContent=money;v.g.children[0].material.color.setHex(0x2563eb);}});
 document.getElementById("sellVehicle").addEventListener("click",()=>{const v=vehicles.find(v=>!v.sold&&Math.abs(v.g.position.z-runner.position.z)<2&&Math.abs(v.g.position.x-runner.position.x)<1.6);if(v&&!v.broken){money+=v.price;document.getElementById("money").textContent=money;v.sold=true;scene.remove(v.g);}});
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script>
-<script>document.getElementById("play").addEventListener("click",()=>{const s=document.getElementById("start");s.style.opacity="0";setTimeout(()=>s.remove(),350)});</script></body></html>
+<script>document.getElementById("restart").addEventListener("click",()=>location.reload());
+document.getElementById("play").addEventListener("click",()=>{const s=document.getElementById("start");s.style.opacity="0";setTimeout(()=>s.remove(),350)});</script></body></html>
